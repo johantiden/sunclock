@@ -141,8 +141,8 @@ viewHand : Int -> Float -> Float -> Svg msg
 viewHand width length turns =
   let
     t = 2 * pi * (turns - 0.25)
-    x = radius + length * cos t
-    y = radius + length * sin t
+    x = center + length * cos t
+    y = center + length * sin t
   in
       line
         [ x1 (String.fromFloat center)
