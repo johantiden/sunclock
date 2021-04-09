@@ -5829,8 +5829,8 @@ var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
 var $author$project$Main$viewHand = F3(
 	function (width, length, turns) {
 		var t = (2 * $elm$core$Basics$pi) * (turns - 0.25);
-		var x = $author$project$Main$radius + (length * $elm$core$Basics$cos(t));
-		var y = $author$project$Main$radius + (length * $elm$core$Basics$sin(t));
+		var x = $author$project$Main$center + (length * $elm$core$Basics$cos(t));
+		var y = $author$project$Main$center + (length * $elm$core$Basics$sin(t));
 		return A2(
 			$elm$svg$Svg$line,
 			_List_fromArray(
