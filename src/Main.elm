@@ -60,7 +60,7 @@ type alias Model =
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Model Time.utc (Time.millisToPosix 0) (0.5 + 20/24) (0.5 + 5/24)
+  ( Model Time.utc (Time.millisToPosix 0) (0.5 + 5/24) (0.5 + 20/24)
   , Cmd.batch
       [ Task.perform AdjustTimeZone Time.here
       , Task.perform Tick Time.now
@@ -114,8 +114,8 @@ view model =
     ]
     (
     viewBackground
-    ++ viewWatchFace
     ++ viewSunsetAndSunriseDots model
+    ++ viewWatchFace
     ++ viewHands model
     ++ viewSun (hourTurns model)
     )
