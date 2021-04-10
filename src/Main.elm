@@ -145,7 +145,7 @@ viewSunRay xCenter yCenter turns =
 hourTurns : Model -> Float
 hourTurns model =
     let
-        hour   = toFloat (Time.toHour   model.zone model.time)
+        hour   = toFloat (Time.toHour model.zone model.time) + (toFloat (Time.toMinute model.zone model.time) + (toFloat (Time.toSecond model.zone model.time)) / 60) / 60
     in
         (0.5 + hour/24)
 

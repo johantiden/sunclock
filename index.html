@@ -5732,8 +5732,25 @@ var $elm$time$Time$toHour = F2(
 				A2($elm$time$Time$toAdjustedMinutes, zone, time),
 				60));
 	});
+var $elm$time$Time$toMinute = F2(
+	function (zone, time) {
+		return A2(
+			$elm$core$Basics$modBy,
+			60,
+			A2($elm$time$Time$toAdjustedMinutes, zone, time));
+	});
+var $elm$time$Time$toSecond = F2(
+	function (_v0, time) {
+		return A2(
+			$elm$core$Basics$modBy,
+			60,
+			A2(
+				$elm$time$Time$flooredDiv,
+				$elm$time$Time$posixToMillis(time),
+				1000));
+	});
 var $author$project$Main$hourTurns = function (model) {
-	var hour = A2($elm$time$Time$toHour, model.zone, model.time);
+	var hour = A2($elm$time$Time$toHour, model.zone, model.time) + ((A2($elm$time$Time$toMinute, model.zone, model.time) + (A2($elm$time$Time$toSecond, model.zone, model.time) / 60)) / 60);
 	return 0.5 + (hour / 24);
 };
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
@@ -5802,23 +5819,6 @@ var $elm$time$Time$toMillis = F2(
 			$elm$core$Basics$modBy,
 			1000,
 			$elm$time$Time$posixToMillis(time));
-	});
-var $elm$time$Time$toMinute = F2(
-	function (zone, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			60,
-			A2($elm$time$Time$toAdjustedMinutes, zone, time));
-	});
-var $elm$time$Time$toSecond = F2(
-	function (_v0, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			60,
-			A2(
-				$elm$time$Time$flooredDiv,
-				$elm$time$Time$posixToMillis(time),
-				1000));
 	});
 var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
