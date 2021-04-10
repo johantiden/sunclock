@@ -53,12 +53,14 @@ main =
 type alias Model =
   { zone : Time.Zone
   , time : Time.Posix
+  , sunriseTurns : Float
+  , sunsetTurns : Float
   }
 
 
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Model Time.utc (Time.millisToPosix 0)
+  ( Model Time.utc (Time.millisToPosix 0) (0.5 + 20/24) (0.5 + 5/24)
   , Cmd.batch
       [ Task.perform AdjustTimeZone Time.here
       , Task.perform Tick Time.now
@@ -113,9 +115,35 @@ view model =
     (
     viewBackground
     ++ viewWatchFace
+    ++ viewSunsetAndSunriseDots model
     ++ viewHands model
     ++ viewSun (hourTurns model)
     )
+
+turnsToAngle turns = 2 * pi * (turns - 0.25)
+
+viewSunsetAndSunriseDots model =
+    let
+        xSunrise = center + watchFaceRadius * cos (turnsToAngle model.sunriseTurns)
+        ySunrise = center + watchFaceRadius * sin (turnsToAngle model.sunriseTurns)
+        xSunset = center + watchFaceRadius * cos (turnsToAngle model.sunsetTurns)
+        ySunSet = center + watchFaceRadius * sin (turnsToAngle model.sunsetTurns)
+    in
+        [ circle
+            [ cx (String.fromFloat xSunrise)
+            , cy (String.fromFloat ySunrise)
+            , r "20"
+            , fill "white"
+            ]
+            []
+        , circle
+            [ cx (String.fromFloat xSunset)
+            , cy (String.fromFloat ySunSet)
+            , r "20"
+            , fill "black"
+            ]
+            []
+        ]
 
 viewBackground =
     [ rect [ x "0", y "0", width sizeStr, height sizeStr, fill "blue" ] []
@@ -131,10 +159,9 @@ viewWatchFace =
 viewSun : Float -> List (Svg msg)
 viewSun turns =
     let
-        t = 2 * pi * (turns - 0.25)
         amplitude = watchFaceRadius + sunRadius + sunPadding
-        x = center + amplitude * cos t
-        y = center + amplitude * sin t
+        x = center + amplitude * cos (turnsToAngle turns)
+        y = center + amplitude * sin (turnsToAngle turns)
     in
         viewSunAt x y
 
@@ -161,7 +188,7 @@ viewSunRay xCenter yCenter turns =
 hourTurns : Model -> Float
 hourTurns model =
     let
-        hour   = toFloat (Time.toHour model.zone model.time) + (toFloat (Time.toMinute model.zone model.time) + (toFloat (Time.toSecond model.zone model.time)) / 60) / 60
+        hour = toFloat (Time.toHour model.zone model.time) + (toFloat (Time.toMinute model.zone model.time) + (toFloat (Time.toSecond model.zone model.time)) / 60) / 60
     in
         (0.5 + hour/24)
 
@@ -184,11 +211,10 @@ viewHand width length turns =
 viewRay : Float -> Float -> Int -> Float -> Float -> Float -> String -> Svg msg
 viewRay xCenter yCenter width radius1 radius2 turns color =
     let
-        t = 2 * pi * (turns - 0.25)
-        x1_ = xCenter + radius1 * cos t
-        y1_ = yCenter + radius1 * sin t
-        x2_ = xCenter + radius2 * cos t
-        y2_ = yCenter + radius2 * sin t
+        x1_ = xCenter + radius1 * cos (turnsToAngle turns)
+        y1_ = yCenter + radius1 * sin (turnsToAngle turns)
+        x2_ = xCenter + radius2 * cos (turnsToAngle turns)
+        y2_ = yCenter + radius2 * sin (turnsToAngle turns)
     in
         line
             [ x1 (String.fromFloat x1_)
