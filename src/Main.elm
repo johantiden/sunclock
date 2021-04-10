@@ -4,6 +4,7 @@ module Main exposing (..)
 
 import Browser
 import Html exposing (Html)
+import List exposing (concat)
 import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes as Attribute exposing (..)
@@ -22,6 +23,8 @@ sunRadius = sunDiameter / 2
 
 center = sunDiameter + radius
 
+dotColor = "black"
+clockFaceColor = "#ff00888b"
 -- MAIN
 
 
@@ -103,22 +106,41 @@ view model =
     , height sizeStr
     ]
     ([ rect [ x "0", y "0", width sizeStr, height sizeStr, fill "blue" ] []
-    , circle [ cx centerStr, cy centerStr, r radiusStr, fill "#1293D8" ] []
+    , circle [ cx centerStr, cy centerStr, r radiusStr, fill clockFaceColor ] []
     ]
     ++ viewHands model
-    ++ viewSun (hourTurns model)
+    ++ viewSunAtHourHand (hourTurns model)
     ++ view24Dots)
 
-viewSun : Float -> List (Svg msg)
-viewSun turns =
+viewSunAtHourHand : Float -> List (Svg msg)
+viewSunAtHourHand turns =
         let
             t = 2 * pi * (turns - 0.25)
             amplitude = radius + sunRadius
             x = center + amplitude * cos t
             y = center + amplitude * sin t
         in
-            [ circle [ cx (String.fromFloat x), cy (String.fromFloat y), r (String.fromFloat sunRadius), fill "yellow" ] []
-            ]
+            viewSun x y
+
+viewSun : Float -> Float -> List (Svg msg)
+viewSun xCenter yCenter =
+    [ (circle [ cx (String.fromFloat xCenter)
+             , cy (String.fromFloat yCenter)
+             , r (String.fromFloat (sunRadius*0.6))
+             , fill "yellow" ]
+             [])
+    ]
+    ++ viewSunRays xCenter yCenter 17
+
+viewSunRays : Float -> Float -> Int -> List (Svg msg)
+viewSunRays xCenter yCenter numRays =
+    List.range 0 numRays
+        |> List.map toFloat
+        |> List.map (\i -> viewSunRay xCenter yCenter (i/(toFloat numRays)))
+
+viewSunRay : Float -> Float -> Float -> Svg msg
+viewSunRay xCenter yCenter turns =
+    viewRay xCenter yCenter 1 sunRadius (sunRadius*0.7) turns "yellow"
 
 hourTurns : Model -> Float
 hourTurns model =
@@ -139,21 +161,28 @@ viewHands model =
 
 viewHand : Int -> Float -> Float -> Svg msg
 viewHand width length turns =
-  let
-    t = 2 * pi * (turns - 0.25)
-    x = center + length * cos t
-    y = center + length * sin t
-  in
-      line
-        [ x1 (String.fromFloat center)
-        , y1 (String.fromFloat center)
-        , x2 (String.fromFloat x)
-        , y2 (String.fromFloat y)
-        , stroke "white"
-        , strokeWidth (String.fromInt width)
-        , strokeLinecap "round"
-        ]
-        []
+    viewRay center center width 0 length turns "red"
+
+viewRay : Float -> Float -> Int -> Float -> Float -> Float -> String -> Svg msg
+viewRay xCenter yCenter width radius1 radius2 turns color =
+    let
+        t = 2 * pi * (turns - 0.25)
+        x1_ = xCenter + radius1 * cos t
+        y1_ = yCenter + radius1 * sin t
+        x2_ = xCenter + radius2 * cos t
+        y2_ = yCenter + radius2 * sin t
+    in
+        line
+            [ x1 (String.fromFloat x1_)
+            , y1 (String.fromFloat y1_)
+            , x2 (String.fromFloat x2_)
+            , y2 (String.fromFloat y2_)
+            , stroke color
+            , strokeWidth (String.fromInt width)
+            , strokeLinecap "round"
+            ]
+            []
+
 
 view24Dots : List (Svg msg)
 view24Dots =
@@ -172,5 +201,5 @@ viewDot turns =
         x = center + amplitude * cos t
         y = center + amplitude * sin t
     in
-        [ circle [ cx (String.fromFloat x), cy (String.fromFloat y), r (String.fromFloat dotRadius), fill "black", opacity "50%" ] []
+        [ circle [ cx (String.fromFloat x), cy (String.fromFloat y), r (String.fromFloat dotRadius), fill dotColor, opacity "50%" ] []
         ]
