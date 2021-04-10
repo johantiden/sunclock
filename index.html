@@ -5775,176 +5775,12 @@ var $author$project$Main$viewBackground = _List_fromArray(
 		_List_Nil)
 	]);
 var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $author$project$Main$add = F2(
-	function (_v0, _v1) {
-		var a = _v0.a;
-		var b = _v0.b;
-		var x = _v1.a;
-		var y = _v1.b;
-		return _Utils_Tuple2(a + x, b + y);
-	});
-var $author$project$Main$div2 = F2(
-	function (_v0, c) {
-		var a = _v0.a;
-		var b = _v0.b;
-		return _Utils_Tuple2(a / c, b / c);
-	});
-var $elm$core$Basics$pow = _Basics_pow;
-var $author$project$Main$magSqr = function (_v0) {
-	var a = _v0.a;
-	var b = _v0.b;
-	return A2($elm$core$Basics$pow, a, 2) + A2($elm$core$Basics$pow, b, 2);
-};
-var $elm$core$Basics$sqrt = _Basics_sqrt;
-var $author$project$Main$mag = function (a) {
-	return $elm$core$Basics$sqrt(
-		$author$project$Main$magSqr(a));
-};
-var $author$project$Main$mul = F2(
-	function (c, _v0) {
-		var a = _v0.a;
-		var b = _v0.b;
-		return _Utils_Tuple2(a * c, b * c);
-	});
-var $author$project$Main$norm = function (a) {
-	return A2(
-		$author$project$Main$div2,
-		a,
-		$author$project$Main$mag(a));
-};
-var $author$project$Main$perp = function (_v0) {
-	var a = _v0.a;
-	var b = _v0.b;
-	return _Utils_Tuple2(-b, a);
-};
-var $author$project$Main$sub = F2(
-	function (_v0, _v1) {
-		var a = _v0.a;
-		var b = _v0.b;
-		var x = _v1.a;
-		var y = _v1.b;
-		return _Utils_Tuple2(a - x, b - y);
-	});
-var $author$project$Main$circlePoints = F3(
-	function (p, q, radius) {
-		var pq = A2($author$project$Main$sub, p, q);
-		var midpoint = A2(
-			$author$project$Main$div2,
-			A2($author$project$Main$add, p, q),
-			2);
-		var magPQ = $author$project$Main$mag(pq);
-		var halfPQ = magPQ / 2;
-		var magMidC = $elm$core$Basics$sqrt(
-			$elm$core$Basics$abs(
-				A2($elm$core$Basics$pow, radius, 2) - A2($elm$core$Basics$pow, halfPQ, 2)));
-		var midC = A2(
-			$author$project$Main$mul,
-			magMidC,
-			$author$project$Main$norm(
-				$author$project$Main$perp(pq)));
-		var diameter = radius * 2;
-		var center2 = A2($author$project$Main$sub, midpoint, midC);
-		var center1 = A2($author$project$Main$add, midpoint, midC);
-		return (!radius) ? $elm$core$Maybe$Nothing : (_Utils_eq(p, q) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(diameter, magPQ) < 0) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
-			_Utils_Tuple2(center1, center2))));
-	});
-var $author$project$Main$earthRadius = $author$project$Main$watchFaceRadius * 200;
-var $author$project$Main$lowest = F2(
-	function (_v0, _v1) {
-		var x2 = _v0.a;
-		var y1 = _v0.b;
-		var x1 = _v1.a;
-		var y2 = _v1.b;
-		return (_Utils_cmp(y1, y2) > 0) ? _Utils_Tuple2(x1, y1) : _Utils_Tuple2(x2, y2);
-	});
-var $author$project$Main$center = _Utils_Tuple2($author$project$Main$sunTotalSize + $author$project$Main$watchFaceRadius, $author$project$Main$sunTotalSize + $author$project$Main$watchFaceRadius);
-var $elm$core$Basics$cos = _Basics_cos;
-var $elm$core$Basics$sin = _Basics_sin;
-var $author$project$Main$sunRadius = $author$project$Main$sunDiameter / 2;
-var $elm$core$Basics$pi = _Basics_pi;
-var $author$project$Main$turnsToAngle = function (turns) {
-	return (2 * $elm$core$Basics$pi) * (turns - 0.25);
-};
-var $author$project$Main$sunriseAndSunset = function (model) {
-	var sunsetAngle = $author$project$Main$turnsToAngle(model.sunsetTurns);
-	var sunriseAngle = $author$project$Main$turnsToAngle(model.sunriseTurns);
-	var amplitude = ($author$project$Main$watchFaceRadius + $author$project$Main$sunRadius) + $author$project$Main$sunPadding;
-	var sunrisePos = A2(
-		$author$project$Main$add,
-		$author$project$Main$center,
-		A2(
-			$author$project$Main$mul,
-			amplitude,
-			_Utils_Tuple2(
-				$elm$core$Basics$cos(sunriseAngle),
-				$elm$core$Basics$sin(sunriseAngle))));
-	var sunsetPos = A2(
-		$author$project$Main$add,
-		$author$project$Main$center,
-		A2(
-			$author$project$Main$mul,
-			amplitude,
-			_Utils_Tuple2(
-				$elm$core$Basics$cos(sunsetAngle),
-				$elm$core$Basics$sin(sunsetAngle))));
-	return _Utils_Tuple2(sunrisePos, sunsetPos);
-};
-var $author$project$Main$earthPosition = function (model) {
-	var _v0 = $author$project$Main$sunriseAndSunset(model);
-	var sunrise = _v0.a;
-	var sunset = _v0.b;
-	var maybeEarth = A3($author$project$Main$circlePoints, sunrise, sunset, $author$project$Main$earthRadius);
-	if (maybeEarth.$ === 'Just') {
-		var _v2 = maybeEarth.a;
-		var earth1 = _v2.a;
-		var earth2 = _v2.b;
-		return $elm$core$Maybe$Just(
-			A2($author$project$Main$lowest, earth1, earth2));
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
+var $author$project$Main$centerStr = $elm$core$String$fromFloat($author$project$Main$sunTotalSize + $author$project$Main$watchFaceRadius);
 var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
 var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var $author$project$Main$viewEarthAt = function (_v0) {
-	var x = _v0.a;
-	var y = _v0.b;
-	return _List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$cx(
-					$elm$core$String$fromFloat(x)),
-					$elm$svg$Svg$Attributes$cy(
-					$elm$core$String$fromFloat(y)),
-					$elm$svg$Svg$Attributes$r(
-					$elm$core$String$fromFloat($author$project$Main$earthRadius)),
-					$elm$svg$Svg$Attributes$fill('#ffffff99')
-				]),
-			_List_Nil)
-		]);
-};
-var $author$project$Main$viewEarth = function (model) {
-	var earthMaybe = $author$project$Main$earthPosition(model);
-	if (earthMaybe.$ === 'Just') {
-		var pos = earthMaybe.a;
-		return $author$project$Main$viewEarthAt(pos);
-	} else {
-		return _List_Nil;
-	}
-};
-var $author$project$Main$centerStr = $elm$core$String$fromFloat($author$project$Main$sunTotalSize + $author$project$Main$watchFaceRadius);
 var $author$project$Main$handColor = 'black';
+var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var $elm$time$Time$toMillis = F2(
 	function (_v0, time) {
 		return A2(
@@ -5952,9 +5788,16 @@ var $elm$time$Time$toMillis = F2(
 			1000,
 			$elm$time$Time$posixToMillis(time));
 	});
+var $author$project$Main$center = _Utils_Tuple2($author$project$Main$sunTotalSize + $author$project$Main$watchFaceRadius, $author$project$Main$sunTotalSize + $author$project$Main$watchFaceRadius);
+var $elm$core$Basics$cos = _Basics_cos;
 var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
+var $elm$core$Basics$sin = _Basics_sin;
 var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
 var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $elm$core$Basics$pi = _Basics_pi;
+var $author$project$Main$turnsToAngle = function (turns) {
+	return (2 * $elm$core$Basics$pi) * (turns - 0.25);
+};
 var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
 var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
 var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
@@ -6017,6 +5860,21 @@ var $author$project$Main$viewHands = function (model) {
 			_List_Nil)
 		]);
 };
+var $author$project$Main$add = F2(
+	function (_v0, _v1) {
+		var a = _v0.a;
+		var b = _v0.b;
+		var x = _v1.a;
+		var y = _v1.b;
+		return _Utils_Tuple2(a + x, b + y);
+	});
+var $author$project$Main$mul = F2(
+	function (c, _v0) {
+		var a = _v0.a;
+		var b = _v0.b;
+		return _Utils_Tuple2(a * c, b * c);
+	});
+var $author$project$Main$sunRadius = $author$project$Main$sunDiameter / 2;
 var $author$project$Main$viewSunRay = F3(
 	function (xCenter, yCenter, turns) {
 		return A6(
@@ -6077,6 +5935,36 @@ var $author$project$Main$viewSun = function (turns) {
 					$author$project$Main$turnsToAngle(turns)))));
 	return $author$project$Main$viewSunAt(pos);
 };
+var $author$project$Main$div2 = F2(
+	function (_v0, c) {
+		var a = _v0.a;
+		var b = _v0.b;
+		return _Utils_Tuple2(a / c, b / c);
+	});
+var $author$project$Main$sunriseAndSunset = function (model) {
+	var sunsetAngle = $author$project$Main$turnsToAngle(model.sunsetTurns);
+	var sunriseAngle = $author$project$Main$turnsToAngle(model.sunriseTurns);
+	var amplitude = ($author$project$Main$watchFaceRadius + $author$project$Main$sunRadius) + $author$project$Main$sunPadding;
+	var sunrisePos = A2(
+		$author$project$Main$add,
+		$author$project$Main$center,
+		A2(
+			$author$project$Main$mul,
+			amplitude,
+			_Utils_Tuple2(
+				$elm$core$Basics$cos(sunriseAngle),
+				$elm$core$Basics$sin(sunriseAngle))));
+	var sunsetPos = A2(
+		$author$project$Main$add,
+		$author$project$Main$center,
+		A2(
+			$author$project$Main$mul,
+			amplitude,
+			_Utils_Tuple2(
+				$elm$core$Basics$cos(sunsetAngle),
+				$elm$core$Basics$sin(sunsetAngle))));
+	return _Utils_Tuple2(sunrisePos, sunsetPos);
+};
 var $author$project$Main$viewSunsetAndSunriseDots = function (model) {
 	var _v0 = $author$project$Main$sunriseAndSunset(model);
 	var _v1 = _v0.a;
@@ -6096,18 +5984,6 @@ var $author$project$Main$viewSunsetAndSunriseDots = function (model) {
 	var midY = _v3.b;
 	return _List_fromArray(
 		[
-			A2(
-			$elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$cx(
-					$elm$core$String$fromFloat(midX)),
-					$elm$svg$Svg$Attributes$cy(
-					$elm$core$String$fromFloat(midY)),
-					$elm$svg$Svg$Attributes$r('20'),
-					$elm$svg$Svg$Attributes$fill('green')
-				]),
-			_List_Nil),
 			A2(
 			$elm$svg$Svg$circle,
 			_List_fromArray(
@@ -6201,13 +6077,11 @@ var $author$project$Main$view = function (model) {
 			_Utils_ap(
 				$author$project$Main$viewSunsetAndSunriseDots(model),
 				_Utils_ap(
-					$author$project$Main$viewEarth(model),
+					$author$project$Main$viewWatchFace,
 					_Utils_ap(
-						$author$project$Main$viewWatchFace,
-						_Utils_ap(
-							$author$project$Main$viewHands(model),
-							$author$project$Main$viewSun(
-								$author$project$Main$hourTurns(model))))))));
+						$author$project$Main$viewHands(model),
+						$author$project$Main$viewSun(
+							$author$project$Main$hourTurns(model)))))));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});

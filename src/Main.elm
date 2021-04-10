@@ -113,7 +113,7 @@ view model =
     (
     viewBackground
     ++ viewSunsetAndSunriseDots model
-    ++ viewEarth model
+    --++ viewEarth model
     ++ viewWatchFace
     ++ viewHands model
     ++ viewSun (hourTurns model)
@@ -178,14 +178,16 @@ viewSunsetAndSunriseDots model =
         ((xSunrise, ySunrise), (xSunset, ySunSet)) = sunriseAndSunset model
         (midX, midY) = div2 (add (xSunrise, ySunrise) (xSunset, ySunSet)) 2
     in
-        [ circle -- midpoint between sunrise and sunset
-            [ cx (String.fromFloat midX)
-            , cy (String.fromFloat midY)
-            , r "20"
-            , fill "green"
-            ]
-            []
-        , circle
+        [
+        --circle -- midpoint between sunrise and sunset
+        --    [ cx (String.fromFloat midX)
+        --    , cy (String.fromFloat midY)
+        --    , r "20"
+        --    , fill "green"
+        --    ]
+        --    []
+        --,
+        circle
             [ cx (String.fromFloat xSunrise)
             , cy (String.fromFloat ySunrise)
             , r "20"
