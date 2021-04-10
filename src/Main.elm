@@ -24,7 +24,7 @@ sunRadius = sunDiameter / 2
 center = sunDiameter + radius
 
 dotColor = "black"
-clockFaceColor = "#ff00888b"
+clockFaceColor = "#DF00FF"
 -- MAIN
 
 
