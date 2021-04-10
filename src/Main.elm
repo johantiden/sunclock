@@ -110,7 +110,8 @@ view model =
     ]
     ++ viewHands model
     ++ viewSunAtHourHand (hourTurns model)
-    ++ view24Dots)
+    ++ view24Dots
+    ++ view12Dots)
 
 viewSunAtHourHand : Float -> List (Svg msg)
 viewSunAtHourHand turns =
@@ -179,7 +180,7 @@ viewRay xCenter yCenter width radius1 radius2 turns color =
             , y2 (String.fromFloat y2_)
             , stroke color
             , strokeWidth (String.fromInt width)
-            , strokeLinecap "round"
+            --, strokeLinecap "round"
             ]
             []
 
@@ -189,17 +190,16 @@ view24Dots =
     List.range 0 23
         |> List.map toFloat
         |> List.map (\n -> n/24)
-        |> List.map viewDot
-        |> List.concat
+        |> List.map (viewDot (radius / 25))
+        --|> List.concat
 
-viewDot : Float -> List (Svg msg)
-viewDot turns =
-    let
-        dotRadius = radius / 50
-        t = 2 * pi * (turns - 0.25)
-        amplitude = radius - dotRadius
-        x = center + amplitude * cos t
-        y = center + amplitude * sin t
-    in
-        [ circle [ cx (String.fromFloat x), cy (String.fromFloat y), r (String.fromFloat dotRadius), fill dotColor, opacity "50%" ] []
-        ]
+view12Dots : List (Svg msg)
+view12Dots =
+    List.range 0 12
+        |> List.map toFloat
+        |> List.map (\n -> n/12)
+        |> List.map (viewDot (radius / 12))
+
+viewDot : Float -> Float -> Svg msg
+viewDot length turns =
+    viewRay center center 4 radius (radius - length) turns "black"

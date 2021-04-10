@@ -5758,71 +5758,12 @@ var $author$project$Main$radiusStr = $elm$core$String$fromFloat($author$project$
 var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
 var $author$project$Main$sunDiameter = 60;
 var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
-};
 var $author$project$Main$center = $author$project$Main$sunDiameter + $author$project$Main$radius;
 var $elm$core$Basics$cos = _Basics_cos;
-var $author$project$Main$dotColor = 'black';
-var $elm$svg$Svg$Attributes$opacity = _VirtualDom_attribute('opacity');
+var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $elm$core$Basics$pi = _Basics_pi;
 var $elm$core$Basics$sin = _Basics_sin;
-var $author$project$Main$viewDot = function (turns) {
-	var t = (2 * $elm$core$Basics$pi) * (turns - 0.25);
-	var dotRadius = $author$project$Main$radius / 50;
-	var amplitude = $author$project$Main$radius - dotRadius;
-	var x = $author$project$Main$center + (amplitude * $elm$core$Basics$cos(t));
-	var y = $author$project$Main$center + (amplitude * $elm$core$Basics$sin(t));
-	return _List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$cx(
-					$elm$core$String$fromFloat(x)),
-					$elm$svg$Svg$Attributes$cy(
-					$elm$core$String$fromFloat(y)),
-					$elm$svg$Svg$Attributes$r(
-					$elm$core$String$fromFloat(dotRadius)),
-					$elm$svg$Svg$Attributes$fill($author$project$Main$dotColor),
-					$elm$svg$Svg$Attributes$opacity('50%')
-				]),
-			_List_Nil)
-		]);
-};
-var $author$project$Main$view24Dots = $elm$core$List$concat(
-	A2(
-		$elm$core$List$map,
-		$author$project$Main$viewDot,
-		A2(
-			$elm$core$List$map,
-			function (n) {
-				return n / 24;
-			},
-			A2(
-				$elm$core$List$map,
-				$elm$core$Basics$toFloat,
-				A2($elm$core$List$range, 0, 23)))));
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $elm$time$Time$toMillis = F2(
-	function (_v0, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			1000,
-			$elm$time$Time$posixToMillis(time));
-	});
-var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
 var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
 var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
 var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
@@ -5849,10 +5790,45 @@ var $author$project$Main$viewRay = F7(
 					$elm$core$String$fromFloat(y2_)),
 					$elm$svg$Svg$Attributes$stroke(color),
 					$elm$svg$Svg$Attributes$strokeWidth(
-					$elm$core$String$fromInt(width)),
-					$elm$svg$Svg$Attributes$strokeLinecap('round')
+					$elm$core$String$fromInt(width))
 				]),
 			_List_Nil);
+	});
+var $author$project$Main$viewDot = F2(
+	function (length, turns) {
+		return A7($author$project$Main$viewRay, $author$project$Main$center, $author$project$Main$center, 4, $author$project$Main$radius, $author$project$Main$radius - length, turns, 'black');
+	});
+var $author$project$Main$view12Dots = A2(
+	$elm$core$List$map,
+	$author$project$Main$viewDot($author$project$Main$radius / 12),
+	A2(
+		$elm$core$List$map,
+		function (n) {
+			return n / 12;
+		},
+		A2(
+			$elm$core$List$map,
+			$elm$core$Basics$toFloat,
+			A2($elm$core$List$range, 0, 12))));
+var $author$project$Main$view24Dots = A2(
+	$elm$core$List$map,
+	$author$project$Main$viewDot($author$project$Main$radius / 25),
+	A2(
+		$elm$core$List$map,
+		function (n) {
+			return n / 24;
+		},
+		A2(
+			$elm$core$List$map,
+			$elm$core$Basics$toFloat,
+			A2($elm$core$List$range, 0, 23))));
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$time$Time$toMillis = F2(
+	function (_v0, time) {
+		return A2(
+			$elm$core$Basics$modBy,
+			1000,
+			$elm$time$Time$posixToMillis(time));
 	});
 var $author$project$Main$viewHand = F3(
 	function (width, length, turns) {
@@ -5966,7 +5942,7 @@ var $author$project$Main$view = function (model) {
 				_Utils_ap(
 					$author$project$Main$viewSunAtHourHand(
 						$author$project$Main$hourTurns(model)),
-					$author$project$Main$view24Dots))));
+					_Utils_ap($author$project$Main$view24Dots, $author$project$Main$view12Dots)))));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
