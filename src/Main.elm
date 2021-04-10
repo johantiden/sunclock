@@ -4,26 +4,30 @@ module Main exposing (..)
 
 import Browser
 import Html exposing (Html)
-import List exposing (concat)
+import List
 import String exposing (join)
 import Svg exposing (..)
-import Svg.Attributes as Attribute exposing (..)
+import Svg.Attributes exposing (..)
 import Task
 import Time
 
-radius : Float
-radius = 350
-radiusStr = radius |> String.fromFloat
-diameter = radius*2
-diameterStr = radius*2 |> String.fromFloat
+watchFaceRadius : Float
+watchFaceRadius = 350
+watchFaceDiameter = watchFaceRadius*2
+
+sunPadding : Float
+sunPadding = 20
 
 sunDiameter : Float
 sunDiameter = 60
 sunRadius = sunDiameter / 2
 
-center = sunDiameter + radius
+sunTotalSize : Float
+sunTotalSize = sunPadding*2 + sunDiameter
 
-dotColor = "black"
+center = sunTotalSize + watchFaceRadius
+
+frameColor = "black"
 clockFaceColor = "#DF00FF"
 -- MAIN
 
@@ -97,8 +101,7 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   let
-    sizeStr = String.fromFloat (diameter+sunDiameter*2)
-    centerStr = String.fromFloat (sunDiameter + radius)
+    sizeStr = String.fromFloat (watchFaceDiameter+sunTotalSize*2)
   in
   svg
     [ (join " " ["0", "0", sizeStr, sizeStr]) |> viewBox
@@ -106,25 +109,34 @@ view model =
     , height sizeStr
     ]
     ([ rect [ x "0", y "0", width sizeStr, height sizeStr, fill "blue" ] []
-    , circle [ cx centerStr, cy centerStr, r radiusStr, fill clockFaceColor ] []
     ]
+    ++ viewWatchFace
     ++ viewHands model
-    ++ viewSunAtHourHand (hourTurns model)
-    ++ view24Dots
-    ++ view12Dots)
+    ++ viewSun (hourTurns model)
+    )
 
-viewSunAtHourHand : Float -> List (Svg msg)
-viewSunAtHourHand turns =
+viewWatchFace : List (Svg msg)
+viewWatchFace =
+    let
+        centerStr = String.fromFloat (sunTotalSize + watchFaceRadius)
+    in
+        [circle [ cx centerStr, cy centerStr, r (String.fromFloat watchFaceRadius), fill clockFaceColor, stroke frameColor, strokeWidth "4" ] []
+        ]
+        ++ view24Dots
+        ++ view12Dots
+
+viewSun : Float -> List (Svg msg)
+viewSun turns =
         let
             t = 2 * pi * (turns - 0.25)
-            amplitude = radius + sunRadius
+            amplitude = watchFaceRadius + sunRadius
             x = center + amplitude * cos t
             y = center + amplitude * sin t
         in
-            viewSun x y
+            viewSunAt x y
 
-viewSun : Float -> Float -> List (Svg msg)
-viewSun xCenter yCenter =
+viewSunAt : Float -> Float -> List (Svg msg)
+viewSunAt xCenter yCenter =
     [ (circle [ cx (String.fromFloat xCenter)
              , cy (String.fromFloat yCenter)
              , r (String.fromFloat (sunRadius*0.6))
@@ -156,9 +168,9 @@ viewHands model =
         minute = toFloat (Time.toMinute model.zone model.time) + (toFloat (Time.toSecond model.zone model.time)) / 60
         second = (toFloat (Time.toSecond model.zone model.time)) + (toFloat (Time.toMillis model.zone model.time)) / 1000
     in
-        [ viewHand 8 (radius*0.6) (hourTurns model)
-        , viewHand 6 (radius*0.9) (minute/60)
-        , viewHand 3 (radius*0.9) (second/60)]
+        [ viewHand 8 (watchFaceRadius*0.6) (hourTurns model)
+        , viewHand 6 (watchFaceRadius*0.9) (minute/60)
+        , viewHand 3 (watchFaceRadius*0.9) (second/60)]
 
 viewHand : Int -> Float -> Float -> Svg msg
 viewHand width length turns =
@@ -190,7 +202,7 @@ view24Dots =
     List.range 0 23
         |> List.map toFloat
         |> List.map (\n -> n/24)
-        |> List.map (viewDot (radius / 25))
+        |> List.map (viewDot (watchFaceRadius / 25))
         --|> List.concat
 
 view12Dots : List (Svg msg)
@@ -198,8 +210,8 @@ view12Dots =
     List.range 0 12
         |> List.map toFloat
         |> List.map (\n -> n/12)
-        |> List.map (viewDot (radius / 12))
+        |> List.map (viewDot (watchFaceRadius / 12))
 
 viewDot : Float -> Float -> Svg msg
 viewDot length turns =
-    viewRay center center 4 radius (radius - length) turns "black"
+    viewRay center center 4 watchFaceRadius (watchFaceRadius - length) turns frameColor
