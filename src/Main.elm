@@ -132,7 +132,7 @@ viewSun : Float -> List (Svg msg)
 viewSun turns =
     let
         t = 2 * pi * (turns - 0.25)
-        amplitude = watchFaceRadius + sunRadius
+        amplitude = watchFaceRadius + sunRadius + sunPadding
         x = center + amplitude * cos t
         y = center + amplitude * sin t
     in
