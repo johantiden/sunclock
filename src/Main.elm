@@ -26,9 +26,13 @@ sunTotalSize : Float
 sunTotalSize = sunPadding*2 + sunDiameter
 
 center = sunTotalSize + watchFaceRadius
+sizeStr = String.fromFloat (watchFaceDiameter+sunTotalSize*2)
 
 frameColor = "black"
 clockFaceColor = "#DF00FF"
+handColor = "black"
+
+
 -- MAIN
 
 
@@ -100,20 +104,21 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-  let
-    sizeStr = String.fromFloat (watchFaceDiameter+sunTotalSize*2)
-  in
   svg
     [ (join " " ["0", "0", sizeStr, sizeStr]) |> viewBox
     , width sizeStr
     , height sizeStr
     ]
-    ([ rect [ x "0", y "0", width sizeStr, height sizeStr, fill "blue" ] []
-    ]
+    (
+    viewBackground
     ++ viewWatchFace
     ++ viewHands model
     ++ viewSun (hourTurns model)
     )
+
+viewBackground =
+    [ rect [ x "0", y "0", width sizeStr, height sizeStr, fill "blue" ] []
+    ]
 
 viewWatchFace : List (Svg msg)
 viewWatchFace =
@@ -174,7 +179,7 @@ viewHands model =
 
 viewHand : Int -> Float -> Float -> Svg msg
 viewHand width length turns =
-    viewRay center center width 0 length turns "red"
+    viewRay center center width 0 length turns handColor
 
 viewRay : Float -> Float -> Int -> Float -> Float -> Float -> String -> Svg msg
 viewRay xCenter yCenter width radius1 radius2 turns color =
