@@ -27,6 +27,7 @@ sunTotalSize = sunPadding*2 + sunDiameter
 
 center = sunTotalSize + watchFaceRadius
 sizeStr = String.fromFloat (watchFaceDiameter+sunTotalSize*2)
+centerStr = String.fromFloat (sunTotalSize + watchFaceRadius)
 
 frameColor = "black"
 clockFaceColor = "#DF00FF"
@@ -122,23 +123,20 @@ viewBackground =
 
 viewWatchFace : List (Svg msg)
 viewWatchFace =
-    let
-        centerStr = String.fromFloat (sunTotalSize + watchFaceRadius)
-    in
-        [circle [ cx centerStr, cy centerStr, r (String.fromFloat watchFaceRadius), fill clockFaceColor, stroke frameColor, strokeWidth "4" ] []
-        ]
-        ++ view24Dots
-        ++ view12Dots
+    [ circle [ cx centerStr, cy centerStr, r (String.fromFloat watchFaceRadius), fill clockFaceColor, stroke frameColor, strokeWidth "4" ] []
+    ]
+    ++ view24Dots
+    ++ view12Dots
 
 viewSun : Float -> List (Svg msg)
 viewSun turns =
-        let
-            t = 2 * pi * (turns - 0.25)
-            amplitude = watchFaceRadius + sunRadius
-            x = center + amplitude * cos t
-            y = center + amplitude * sin t
-        in
-            viewSunAt x y
+    let
+        t = 2 * pi * (turns - 0.25)
+        amplitude = watchFaceRadius + sunRadius
+        x = center + amplitude * cos t
+        y = center + amplitude * sin t
+    in
+        viewSunAt x y
 
 viewSunAt : Float -> Float -> List (Svg msg)
 viewSunAt xCenter yCenter =
@@ -175,7 +173,9 @@ viewHands model =
     in
         [ viewHand 8 (watchFaceRadius*0.6) (hourTurns model)
         , viewHand 6 (watchFaceRadius*0.9) (minute/60)
-        , viewHand 3 (watchFaceRadius*0.9) (second/60)]
+        , viewHand 3 (watchFaceRadius*0.9) (second/60)
+        , circle [ cx centerStr, cy centerStr, r "10", fill handColor ] []
+        ]
 
 viewHand : Int -> Float -> Float -> Svg msg
 viewHand width length turns =
