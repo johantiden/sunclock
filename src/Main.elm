@@ -4,7 +4,7 @@ module Main exposing (..)
 
 import Browser
 import Html exposing (Html)
-import List
+import List exposing (concat)
 import String exposing (join)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -27,15 +27,18 @@ sunTotalSize : Float
 sunTotalSize = sunPadding*2 + sunDiameter
 
 watchFaceCenter = (sunTotalSize + watchFaceRadius, sunTotalSize + watchFaceRadius)
-sizeStr = String.fromFloat (watchFaceDiameter+sunTotalSize*2)
+sceneSize = watchFaceDiameter+sunTotalSize*2
+sceneSizeStr = String.fromFloat sceneSize
 centerStr = String.fromFloat (sunTotalSize + watchFaceRadius)
 
-earthRadius = watchFaceRadius*200
-
 frameColor = "black"
-clockFaceColor = "#DF00FF77"
+clockFaceColor = "#FFFFFFFF"
 handColor = "black"
+earthColor = "#004400ff"
 
+
+sunriseHour = 5
+sunsetHour = 20
 
 -- MAIN
 
@@ -60,10 +63,9 @@ type alias Model =
   , sunsetTurns : Float
   }
 
-
 init : () -> (Model, Cmd Msg)
 init _ =
-  ( Model Time.utc (Time.millisToPosix 0) (0.5 + 5/24) (0.5 + 20/24)
+  ( Model Time.utc (Time.millisToPosix 0) (0.5 + sunriseHour/24) (0.5 + sunsetHour/24)
   , Cmd.batch
       [ Task.perform AdjustTimeZone Time.here
       , Task.perform Tick Time.now
@@ -107,17 +109,17 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   svg
-    [ (join " " ["0", "0", sizeStr, sizeStr]) |> viewBox
-    , width sizeStr
-    , height sizeStr
+    [ (join " " ["0", "0", sceneSizeStr, sceneSizeStr]) |> viewBox
+    , width sceneSizeStr
+    , height sceneSizeStr
     ]
     (
     viewBackground
-    ++ viewSunsetAndSunriseDots model
-    ++ viewEarth model
+    ++ viewSun (hourTurns model) "yellow" "none"
+    ++ viewEarth_ model
+    ++ viewSun (hourTurns model) "#ffff0011" "white"
     ++ viewWatchFace
     ++ viewHands model
-    ++ viewSun (hourTurns model)
     )
 
 turnsToAngle turns = 2 * pi * (turns - 0.25)
@@ -125,64 +127,44 @@ turnsToAngle turns = 2 * pi * (turns - 0.25)
 sunriseAndSunset model =
     let
         amplitude = watchFaceRadius + sunRadius + sunPadding
-        sunriseAngle = turnsToAngle model.sunriseTurns
+        (sunriseAngle, sunsetAngle) = sunriseAndSunsetAngle model
         sunrisePos = (cos sunriseAngle, sin sunriseAngle) |> mul amplitude |> add watchFaceCenter
-        sunsetAngle = turnsToAngle model.sunsetTurns
         sunsetPos = (cos sunsetAngle, sin sunsetAngle) |> mul amplitude |> add watchFaceCenter
     in
         ( sunrisePos
         , sunsetPos
         )
 
-viewEarth : Model -> List (Svg msg)
-viewEarth model =
-    let
-        earthMaybe = earthPosition model
-    in
-        case earthMaybe of
-            Just pos -> viewEarthAt pos
-            Nothing -> []
+sunriseAndSunsetAngle model =
+    ( turnsToAngle model.sunriseTurns
+    , turnsToAngle model.sunsetTurns
+    )
 
-viewEarthAt : (Float, Float) -> List (Svg msg)
-viewEarthAt (x, y) =
-    [ circle
-      [ cx (String.fromFloat x)
-      , cy (String.fromFloat y)
-      , r (String.fromFloat earthRadius)
-      , fill "#ffffff99"
-      ]
-      []
-    ]
-
-
-earthPosition : Model -> Maybe (Float, Float)
-earthPosition model =
+viewEarth_ : Model -> List (Svg msg)
+viewEarth_ model =
     let
         (sunrise, sunset) = sunriseAndSunset model
-        maybeEarth = circlePoints sunrise sunset earthRadius
+        --midpoint = div2 (add sunrise sunset) 2
+        --p = sunrise
+        --q = sunset
+        --pq       = sub p q
+        --normal_ = normalize (perp pq)
+        --center1  = add midpoint (mul 100 normal_)
+        --center2  = sub midpoint (mul 100 normal_)
+
+        --amplitude = watchFaceRadius + sunRadius + sunPadding
+        --midAngle = (v1 + v2) /2
+        --midPos = (cos midAngle, sin midAngle) |> mul amplitude |> add watchFaceCenter
+        --(v1, v2) = sunriseAndSunsetAngle model
     in
-        case maybeEarth of
-          Just (earth1, earth2) -> Just <| lowest earth1 earth2
-          Nothing -> Nothing
-
-
-lowest : (Float, Float) -> (Float, Float) -> (Float, Float)
-lowest (x2, y1) (x1, y2) =
-    if y1 > y2 then
-        (x1, y1)
-    else
-        (x2, y2)
-
-viewSunsetAndSunriseDots : Model -> List (Svg msg)
-viewSunsetAndSunriseDots model =
-    let
-        (sunrise, sunset) = sunriseAndSunset model
-        midPoint = div2 (add sunrise sunset) 2
-    in
-        [ viewCircle midPoint 20 "green"
-        , viewCircle sunrise 20 "white"
-        , viewCircle sunset 20 "black"
-        ]
+        [
+          --viewCircle midpoint 10 "green"
+        --, viewCircle sunrise 10 "white"
+        --, viewCircle sunset 10 "black"
+        --, viewCircle center1 10 "green"
+        --, viewCircle center2 10 "green"
+        --, viewCircle midPos 10 "cyan"
+        ] ++ viewEarth sunrise sunset earthColor "none"
 
 viewCircle center radius fill_ =
     circle
@@ -196,47 +178,61 @@ viewCircle center radius fill_ =
 
 viewBackground : List (Svg msg)
 viewBackground =
-    [ rect [ x "0", y "0", width sizeStr, height sizeStr, fill "blue" ] []
+    [ rect [ x "0", y "0", width sceneSizeStr, height sceneSizeStr, fill "blue" ] []
     ]
 
 viewWatchFace : List (Svg msg)
 viewWatchFace =
     [ circle [ cx centerStr, cy centerStr, r (String.fromFloat watchFaceRadius), fill clockFaceColor, stroke frameColor, strokeWidth "4" ] []
+    , text_
+              [ x "130"
+              , y "130"
+              , fill "black"
+              , textAnchor "middle"
+              , dominantBaseline "central"
+              , transform "rotate(-45 130,130)"
+              ]
+              [ text "Welcome to Shapes Club"
+              ]
     ]
     ++ view24Dots
     ++ view12Dots
+    ++ viewNumbers
 
-viewSun : Float -> List (Svg msg)
-viewSun turns =
+
+viewSun : Float -> String -> String -> List (Svg msg)
+viewSun turns fill stroke =
     let
         amplitude = watchFaceRadius + sunRadius + sunPadding
         pos = (cos (turnsToAngle turns), sin (turnsToAngle turns)) |> mul amplitude |> add watchFaceCenter
     in
-        viewSunAt pos
+        viewSunAt pos fill stroke
 
-viewSunAt : (Float, Float) -> List (Svg msg)
-viewSunAt (xCenter, yCenter) =
+viewSunAt : (Float, Float) -> String -> String -> List (Svg msg)
+viewSunAt (xCenter, yCenter) fill_ stroke_ =
     [ (circle [ cx (String.fromFloat xCenter)
              , cy (String.fromFloat yCenter)
              , r (String.fromFloat (sunRadius*0.6))
-             , fill "yellow" ]
+             , fill fill_
+             , stroke stroke_ ]
              [])
     ]
-    ++ viewSunRays xCenter yCenter 17
+    ++ viewSunRays xCenter yCenter 17 fill_
 
-viewSunRays : Float -> Float -> Int -> List (Svg msg)
-viewSunRays xCenter yCenter numRays =
+viewSunRays : Float -> Float -> Int -> String -> List (Svg msg)
+viewSunRays xCenter yCenter numRays color =
     List.range 0 numRays
         |> List.map toFloat
-        |> List.map (\i -> viewSunRay xCenter yCenter (i/(toFloat numRays)))
+        |> List.map (\i -> viewSunRay xCenter yCenter (i/(toFloat numRays)) color)
 
-viewSunRay : Float -> Float -> Float -> Svg msg
-viewSunRay xCenter yCenter turns =
-    viewRay (xCenter, yCenter) 1 sunRadius (sunRadius*0.7) turns "yellow"
+viewSunRay : Float -> Float -> Float -> String -> Svg msg
+viewSunRay xCenter yCenter turns color =
+    viewRay (xCenter, yCenter) 1 sunRadius (sunRadius*0.7) turns color
 
 hourTurns : Model -> Float
 hourTurns model =
     let
+        --hour = ((toFloat (Time.toSecond model.zone model.time)) + (toFloat (Time.toMillis model.zone model.time)) / 1000) * 2
         hour = toFloat (Time.toHour model.zone model.time) + (toFloat (Time.toMinute model.zone model.time) + (toFloat (Time.toSecond model.zone model.time)) / 60) / 60
     in
         (0.5 + hour/24)
@@ -254,8 +250,8 @@ viewHands model =
         ]
 
 viewHand : Int -> Float -> Float -> Svg msg
-viewHand width length turns =
-    viewRay watchFaceCenter width 0 length turns handColor
+viewHand width length_ turns =
+    viewRay watchFaceCenter width 0 length_ turns handColor
 
 viewRay : (Float, Float) -> Int -> Float -> Float -> Float -> String -> Svg msg
 viewRay (xCenter, yCenter) width radius1 radius2 turns color =
@@ -277,6 +273,17 @@ viewRay (xCenter, yCenter) width radius1 radius2 turns color =
             []
 
 
+viewNumbers : List (Svg msg)
+viewNumbers =
+    List.range 0 23
+        |> List.map viewNumber
+        |> concat
+
+viewNumber : Int -> List (Svg msg)
+viewNumber hour =
+    []
+
+
 view24Dots : List (Svg msg)
 view24Dots =
     List.range 0 23
@@ -293,41 +300,47 @@ view12Dots =
         |> List.map (viewDot (watchFaceRadius / 12))
 
 viewDot : Float -> Float -> Svg msg
-viewDot length turns =
-    viewRay watchFaceCenter 4 watchFaceRadius (watchFaceRadius - length) turns frameColor
+viewDot length_ turns =
+    viewRay watchFaceCenter 8 watchFaceRadius (watchFaceRadius - length_) turns frameColor
 
+viewEarth : (Float, Float) -> (Float, Float) -> String -> String -> List (Svg msg)
+viewEarth p1 p2 fill stroke =
+    let
+        yLeft = lineFromTwoPoints p1 p2 0
+        yRight = lineFromTwoPoints p1 p2 sceneSize
+        earthTopLeft = (0, yLeft)
+        earthTopRight = (sceneSize, yRight)
+        sceneBottomRight = (sceneSize, sceneSize)
+        sceneBottomLeft = (0, sceneSize)
+        poly = [earthTopLeft, earthTopRight, sceneBottomRight, sceneBottomLeft]
+    in
+        viewPolygon fill stroke poly
+
+viewPolygon : String -> String -> List ((Float, Float)) -> List (Svg msg)
+viewPolygon fill_ stroke_ poly =
+    let
+        tupleToString (x, y) = [String.fromFloat x, String.fromFloat y] |> String.join ","
+        pointsStr = poly |> List.map tupleToString |> String.join " "
+    in
+        [ polygon [ fill fill_, stroke stroke_, points pointsStr ] []
+        ]
+
+lineFromTwoPoints (x1, y1) (x2, y2) x =
+    let
+        y = (y2 - y1) * (x - x1) / (x2 - x1) + y1
+    in
+        y
 
 
 -- https://rosettacode.org/wiki/Circles_of_given_radius_through_two_points#Haskell
 
 add (a, b) (x, y) = (a + x, b + y)
 sub (a, b) (x, y) = (a - x, b - y)
-magSqr (a, b)     = (a ^ 2) + (b ^ 2)
-mag a             = sqrt (magSqr a)
+lengthSqr (a, b)     = (a ^ 2) + (b ^ 2)
+length a             = sqrt (lengthSqr a)
 mul c (a, b)      = (a * c, b * c)
 div2 (a, b) c     = (a / c, b / c)
 perp (a, b)       = (negate b, a)
-norm a            = div2 a (mag a)
 
-circlePoints : (Float, Float) -> (Float, Float) -> Float -> Maybe ((Float, Float), (Float, Float))
-circlePoints p q radius =
-    let
-        diameter = radius * 2
-        pq       = sub p q
-        magPQ    = mag pq
-        midpoint = div2 (add p q) 2
-        halfPQ   = magPQ / 2
-        magMidC  = sqrt (abs ((radius ^ 2) - (halfPQ ^ 2)))
-        midC     = mul magMidC (norm (perp pq))
-        center1  = add midpoint midC
-        center2  = sub midpoint midC
-    in
-        if radius == 0 then
-            Nothing
-        else if p == q  then
-            Nothing
-        else if diameter < magPQ  then
-            Nothing
-        else
-            Just (center1, center2)
-
+normalize : (Float, Float) -> (Float, Float)
+normalize a            = div2 a (length a)
