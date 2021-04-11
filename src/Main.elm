@@ -170,13 +170,14 @@ viewEarth_ model =
         ] ++ viewEarth sunrise sunset earthColor "none"
 
 viewCircle center radius fill_ =
-    circle
+    [ circle
         [ cx <| String.fromFloat <| first center
         , cy <| String.fromFloat <| second center
         , r <| String.fromFloat radius
         , fill fill_
         ]
         []
+    ]
 
 viewBackground : List (Svg msg)
 viewBackground =
@@ -190,7 +191,25 @@ viewWatchFace =
     ++ view24Dots
     ++ view12Dots
     ++ viewNumbers
+    ++ viewBranding
 
+
+viewBranding : List (Svg msg)
+viewBranding =
+    let
+        pos = radial watchFaceCenter (watchFaceRadius/3) (turnsToAngle 0)
+    in
+        [ text_
+            [ x <| String.fromFloat <| first pos
+            , y <| String.fromFloat <| second pos
+            , fill "black"
+            , textAnchor "middle"
+            , dominantBaseline "central"
+            , fontSize "10"
+            ]
+            [ text "sol.tidn.se"
+            ]
+        ]
 
 viewSun : Float -> String -> String -> List (Svg msg)
 viewSun turns fill stroke =
@@ -286,8 +305,7 @@ viewNumber hour =
             else
               "20"
     in
-        [ viewCircle pos 1 "yellow"
-        , text_
+        [ text_
             [ x <| String.fromFloat <| first pos
             , y <| String.fromFloat <| second pos
             , fill "black"
