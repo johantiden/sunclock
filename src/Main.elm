@@ -4,6 +4,7 @@ module Main exposing (..)
 
 import Browser
 import Html exposing (Html)
+import Html.Attributes
 import List exposing (concat)
 import String exposing (join)
 import Svg exposing (..)
@@ -108,19 +109,36 @@ subscriptions _ =
 
 view : Model -> Html Msg
 view model =
-  svg
-    [ (join " " ["0", "0", sceneSizeStr, sceneSizeStr]) |> viewBox
-    , width sceneSizeStr
-    , height sceneSizeStr
+    Html.div
+    [ Html.Attributes.style "background-color" "white" ]
+    [ svg
+        [ viewBox <| join " " ["0", "0", sceneSizeStr, sceneSizeStr]
+        , Html.Attributes.style "width" "100%"
+        , width sceneSizeStr
+        , height sceneSizeStr
+        ]
+        (
+        viewBackground
+        ++ viewSun (hourTurns model) "yellow" "none"
+        ++ viewEarth_ model
+        ++ viewSun (hourTurns model) "#ffff0011" "white"
+        ++ viewWatchFace
+        ++ viewHands model
+        )
+    , Html.a
+        [ Html.Attributes.href "https://github.com/johantiden/sunclock"
+        , Html.Attributes.style "float" "right"
+        ]
+        [ Html.img
+            [ Html.Attributes.src "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+            , Html.Attributes.style "height" "1em"
+            , Html.Attributes.style "vertical-align" "bottom"
+            ]
+            []
+        , Html.text "johantiden/sunclock"
+        ]
     ]
-    (
-    viewBackground
-    ++ viewSun (hourTurns model) "yellow" "none"
-    ++ viewEarth_ model
-    ++ viewSun (hourTurns model) "#ffff0011" "white"
-    ++ viewWatchFace
-    ++ viewHands model
-    )
+
 
 turnsToAngle turns = 2 * pi * (turns - 0.25)
 
