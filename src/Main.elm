@@ -10,6 +10,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Task
 import Time
+import Tuple exposing (first, second)
 
 watchFaceRadius : Float
 watchFaceRadius = 350
@@ -25,7 +26,7 @@ sunRadius = sunDiameter / 2
 sunTotalSize : Float
 sunTotalSize = sunPadding*2 + sunDiameter
 
-center = (sunTotalSize + watchFaceRadius, sunTotalSize + watchFaceRadius)
+watchFaceCenter = (sunTotalSize + watchFaceRadius, sunTotalSize + watchFaceRadius)
 sizeStr = String.fromFloat (watchFaceDiameter+sunTotalSize*2)
 centerStr = String.fromFloat (sunTotalSize + watchFaceRadius)
 
@@ -113,7 +114,7 @@ view model =
     (
     viewBackground
     ++ viewSunsetAndSunriseDots model
-    --++ viewEarth model
+    ++ viewEarth model
     ++ viewWatchFace
     ++ viewHands model
     ++ viewSun (hourTurns model)
@@ -125,9 +126,9 @@ sunriseAndSunset model =
     let
         amplitude = watchFaceRadius + sunRadius + sunPadding
         sunriseAngle = turnsToAngle model.sunriseTurns
-        sunrisePos = (cos sunriseAngle, sin sunriseAngle) |> mul amplitude |> add center
+        sunrisePos = (cos sunriseAngle, sin sunriseAngle) |> mul amplitude |> add watchFaceCenter
         sunsetAngle = turnsToAngle model.sunsetTurns
-        sunsetPos = (cos sunsetAngle, sin sunsetAngle) |> mul amplitude |> add center
+        sunsetPos = (cos sunsetAngle, sin sunsetAngle) |> mul amplitude |> add watchFaceCenter
     in
         ( sunrisePos
         , sunsetPos
@@ -175,33 +176,23 @@ lowest (x2, y1) (x1, y2) =
 viewSunsetAndSunriseDots : Model -> List (Svg msg)
 viewSunsetAndSunriseDots model =
     let
-        ((xSunrise, ySunrise), (xSunset, ySunSet)) = sunriseAndSunset model
-        (midX, midY) = div2 (add (xSunrise, ySunrise) (xSunset, ySunSet)) 2
+        (sunrise, sunset) = sunriseAndSunset model
+        midPoint = div2 (add sunrise sunset) 2
     in
-        [
-        --circle -- midpoint between sunrise and sunset
-        --    [ cx (String.fromFloat midX)
-        --    , cy (String.fromFloat midY)
-        --    , r "20"
-        --    , fill "green"
-        --    ]
-        --    []
-        --,
-        circle
-            [ cx (String.fromFloat xSunrise)
-            , cy (String.fromFloat ySunrise)
-            , r "20"
-            , fill "white"
-            ]
-            []
-        , circle
-            [ cx (String.fromFloat xSunset)
-            , cy (String.fromFloat ySunSet)
-            , r "20"
-            , fill "black"
-            ]
-            []
+        [ viewCircle midPoint 20 "green"
+        , viewCircle sunrise 20 "white"
+        , viewCircle sunset 20 "black"
         ]
+
+viewCircle center radius fill_ =
+    circle
+        [ cx <| String.fromFloat <| first center
+        , cy <| String.fromFloat <| second center
+        , r <| String.fromFloat radius
+        , fill fill_
+        ]
+        []
+
 
 viewBackground : List (Svg msg)
 viewBackground =
@@ -219,7 +210,7 @@ viewSun : Float -> List (Svg msg)
 viewSun turns =
     let
         amplitude = watchFaceRadius + sunRadius + sunPadding
-        pos = (cos (turnsToAngle turns), sin (turnsToAngle turns)) |> mul amplitude |> add center
+        pos = (cos (turnsToAngle turns), sin (turnsToAngle turns)) |> mul amplitude |> add watchFaceCenter
     in
         viewSunAt pos
 
@@ -264,7 +255,7 @@ viewHands model =
 
 viewHand : Int -> Float -> Float -> Svg msg
 viewHand width length turns =
-    viewRay center width 0 length turns handColor
+    viewRay watchFaceCenter width 0 length turns handColor
 
 viewRay : (Float, Float) -> Int -> Float -> Float -> Float -> String -> Svg msg
 viewRay (xCenter, yCenter) width radius1 radius2 turns color =
@@ -303,7 +294,7 @@ view12Dots =
 
 viewDot : Float -> Float -> Svg msg
 viewDot length turns =
-    viewRay center 4 watchFaceRadius (watchFaceRadius - length) turns frameColor
+    viewRay watchFaceCenter 4 watchFaceRadius (watchFaceRadius - length) turns frameColor
 
 
 
