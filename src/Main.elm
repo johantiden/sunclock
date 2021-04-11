@@ -100,7 +100,7 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
   Time.every 10 Tick
 
 -- VIEW
@@ -128,12 +128,15 @@ sunriseAndSunset model =
     let
         amplitude = watchFaceRadius + sunRadius + sunPadding
         (sunriseAngle, sunsetAngle) = sunriseAndSunsetAngle model
-        sunrisePos = (cos sunriseAngle, sin sunriseAngle) |> mul amplitude |> add watchFaceCenter
-        sunsetPos = (cos sunsetAngle, sin sunsetAngle) |> mul amplitude |> add watchFaceCenter
+        sunrisePos = radial watchFaceCenter amplitude sunriseAngle
+        sunsetPos = radial watchFaceCenter amplitude sunsetAngle
     in
         ( sunrisePos
         , sunsetPos
         )
+
+radial center radius angle  =
+    (cos angle, sin angle) |> mul radius |> add center
 
 sunriseAndSunsetAngle model =
     ( turnsToAngle model.sunriseTurns
@@ -175,7 +178,6 @@ viewCircle center radius fill_ =
         ]
         []
 
-
 viewBackground : List (Svg msg)
 viewBackground =
     [ rect [ x "0", y "0", width sceneSizeStr, height sceneSizeStr, fill "blue" ] []
@@ -184,16 +186,6 @@ viewBackground =
 viewWatchFace : List (Svg msg)
 viewWatchFace =
     [ circle [ cx centerStr, cy centerStr, r (String.fromFloat watchFaceRadius), fill clockFaceColor, stroke frameColor, strokeWidth "4" ] []
-    , text_
-              [ x "130"
-              , y "130"
-              , fill "black"
-              , textAnchor "middle"
-              , dominantBaseline "central"
-              , transform "rotate(-45 130,130)"
-              ]
-              [ text "Welcome to Shapes Club"
-              ]
     ]
     ++ view24Dots
     ++ view12Dots
@@ -204,7 +196,8 @@ viewSun : Float -> String -> String -> List (Svg msg)
 viewSun turns fill stroke =
     let
         amplitude = watchFaceRadius + sunRadius + sunPadding
-        pos = (cos (turnsToAngle turns), sin (turnsToAngle turns)) |> mul amplitude |> add watchFaceCenter
+        angle = turnsToAngle turns
+        pos = radial watchFaceCenter amplitude angle
     in
         viewSunAt pos fill stroke
 
@@ -235,7 +228,11 @@ hourTurns model =
         --hour = ((toFloat (Time.toSecond model.zone model.time)) + (toFloat (Time.toMillis model.zone model.time)) / 1000) * 2
         hour = toFloat (Time.toHour model.zone model.time) + (toFloat (Time.toMinute model.zone model.time) + (toFloat (Time.toSecond model.zone model.time)) / 60) / 60
     in
-        (0.5 + hour/24)
+        hourTurns_ hour
+
+hourTurns_ : Float -> Float
+hourTurns_ hour =
+    (0.5 + hour/24)
 
 viewHands : Model -> List (Svg msg)
 viewHands model =
@@ -254,12 +251,11 @@ viewHand width length_ turns =
     viewRay watchFaceCenter width 0 length_ turns handColor
 
 viewRay : (Float, Float) -> Int -> Float -> Float -> Float -> String -> Svg msg
-viewRay (xCenter, yCenter) width radius1 radius2 turns color =
+viewRay center width radius1 radius2 turns color =
     let
-        x1_ = xCenter + radius1 * cos (turnsToAngle turns)
-        y1_ = yCenter + radius1 * sin (turnsToAngle turns)
-        x2_ = xCenter + radius2 * cos (turnsToAngle turns)
-        y2_ = yCenter + radius2 * sin (turnsToAngle turns)
+        angle = turnsToAngle turns
+        (x1_, y1_) = radial center radius1 angle
+        (x2_, y2_) = radial center radius2 angle
     in
         line
             [ x1 (String.fromFloat x1_)
@@ -281,7 +277,27 @@ viewNumbers =
 
 viewNumber : Int -> List (Svg msg)
 viewNumber hour =
-    []
+    let
+        angle = hourTurns_ (toFloat hour) |> turnsToAngle
+        pos = radial watchFaceCenter (watchFaceRadius*0.8) angle
+        fontSize_ =
+            if modBy 3 hour == 0 then
+              "30"
+            else
+              "20"
+    in
+        [ viewCircle pos 1 "yellow"
+        , text_
+            [ x <| String.fromFloat <| first pos
+            , y <| String.fromFloat <| second pos
+            , fill "black"
+            , textAnchor "middle"
+            , dominantBaseline "central"
+            , fontSize fontSize_
+            ]
+            [ text <| String.fromInt hour
+            ]
+        ]
 
 
 view24Dots : List (Svg msg)

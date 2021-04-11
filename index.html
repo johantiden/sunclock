@@ -5649,7 +5649,7 @@ var $elm$time$Time$every = F2(
 		return $elm$time$Time$subscription(
 			A2($elm$time$Time$Every, interval, tagger));
 	});
-var $author$project$Main$subscriptions = function (model) {
+var $author$project$Main$subscriptions = function (_v0) {
 	return A2($elm$time$Time$every, 10, $author$project$Main$Tick);
 };
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
@@ -5672,6 +5672,9 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $author$project$Main$hourTurns_ = function (hour) {
+	return 0.5 + (hour / 24);
+};
 var $elm$time$Time$flooredDiv = F2(
 	function (numerator, denominator) {
 		return $elm$core$Basics$floor(numerator / denominator);
@@ -5746,7 +5749,7 @@ var $elm$time$Time$toSecond = F2(
 	});
 var $author$project$Main$hourTurns = function (model) {
 	var hour = A2($elm$time$Time$toHour, model.zone, model.time) + ((A2($elm$time$Time$toMinute, model.zone, model.time) + (A2($elm$time$Time$toSecond, model.zone, model.time) / 60)) / 60);
-	return 0.5 + (hour / 24);
+	return $author$project$Main$hourTurns_(hour);
 };
 var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$Main$sunDiameter = 60;
@@ -5795,6 +5798,18 @@ var $author$project$Main$mul = F2(
 		return _Utils_Tuple2(a * c, b * c);
 	});
 var $elm$core$Basics$sin = _Basics_sin;
+var $author$project$Main$radial = F3(
+	function (center, radius, angle) {
+		return A2(
+			$author$project$Main$add,
+			center,
+			A2(
+				$author$project$Main$mul,
+				radius,
+				_Utils_Tuple2(
+					$elm$core$Basics$cos(angle),
+					$elm$core$Basics$sin(angle))));
+	});
 var $author$project$Main$sunRadius = $author$project$Main$sunDiameter / 2;
 var $elm$core$Basics$pi = _Basics_pi;
 var $author$project$Main$turnsToAngle = function (turns) {
@@ -5811,24 +5826,8 @@ var $author$project$Main$sunriseAndSunset = function (model) {
 	var _v0 = $author$project$Main$sunriseAndSunsetAngle(model);
 	var sunriseAngle = _v0.a;
 	var sunsetAngle = _v0.b;
-	var sunrisePos = A2(
-		$author$project$Main$add,
-		$author$project$Main$watchFaceCenter,
-		A2(
-			$author$project$Main$mul,
-			amplitude,
-			_Utils_Tuple2(
-				$elm$core$Basics$cos(sunriseAngle),
-				$elm$core$Basics$sin(sunriseAngle))));
-	var sunsetPos = A2(
-		$author$project$Main$add,
-		$author$project$Main$watchFaceCenter,
-		A2(
-			$author$project$Main$mul,
-			amplitude,
-			_Utils_Tuple2(
-				$elm$core$Basics$cos(sunsetAngle),
-				$elm$core$Basics$sin(sunsetAngle))));
+	var sunrisePos = A3($author$project$Main$radial, $author$project$Main$watchFaceCenter, amplitude, sunriseAngle);
+	var sunsetPos = A3($author$project$Main$radial, $author$project$Main$watchFaceCenter, amplitude, sunsetAngle);
 	return _Utils_Tuple2(sunrisePos, sunsetPos);
 };
 var $author$project$Main$lineFromTwoPoints = F3(
@@ -5914,17 +5913,14 @@ var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
 var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
 var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
 var $author$project$Main$viewRay = F6(
-	function (_v0, width, radius1, radius2, turns, color) {
-		var xCenter = _v0.a;
-		var yCenter = _v0.b;
-		var y2_ = yCenter + (radius2 * $elm$core$Basics$sin(
-			$author$project$Main$turnsToAngle(turns)));
-		var y1_ = yCenter + (radius1 * $elm$core$Basics$sin(
-			$author$project$Main$turnsToAngle(turns)));
-		var x2_ = xCenter + (radius2 * $elm$core$Basics$cos(
-			$author$project$Main$turnsToAngle(turns)));
-		var x1_ = xCenter + (radius1 * $elm$core$Basics$cos(
-			$author$project$Main$turnsToAngle(turns)));
+	function (center, width, radius1, radius2, turns, color) {
+		var angle = $author$project$Main$turnsToAngle(turns);
+		var _v0 = A3($author$project$Main$radial, center, radius2, angle);
+		var x2_ = _v0.a;
+		var y2_ = _v0.b;
+		var _v1 = A3($author$project$Main$radial, center, radius1, angle);
+		var x1_ = _v1.a;
+		var y1_ = _v1.b;
 		return A2(
 			$elm$svg$Svg$line,
 			_List_fromArray(
@@ -6020,28 +6016,13 @@ var $author$project$Main$viewSunAt = F3(
 	});
 var $author$project$Main$viewSun = F3(
 	function (turns, fill, stroke) {
+		var angle = $author$project$Main$turnsToAngle(turns);
 		var amplitude = ($author$project$Main$watchFaceRadius + $author$project$Main$sunRadius) + $author$project$Main$sunPadding;
-		var pos = A2(
-			$author$project$Main$add,
-			$author$project$Main$watchFaceCenter,
-			A2(
-				$author$project$Main$mul,
-				amplitude,
-				_Utils_Tuple2(
-					$elm$core$Basics$cos(
-						$author$project$Main$turnsToAngle(turns)),
-					$elm$core$Basics$sin(
-						$author$project$Main$turnsToAngle(turns)))));
+		var pos = A3($author$project$Main$radial, $author$project$Main$watchFaceCenter, amplitude, angle);
 		return A3($author$project$Main$viewSunAt, pos, fill, stroke);
 	});
 var $author$project$Main$clockFaceColor = '#FFFFFFFF';
-var $elm$svg$Svg$Attributes$dominantBaseline = _VirtualDom_attribute('dominant-baseline');
 var $author$project$Main$frameColor = 'black';
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$svg$Svg$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$svg$Svg$Attributes$textAnchor = _VirtualDom_attribute('text-anchor');
-var $elm$svg$Svg$text_ = $elm$svg$Svg$trustedNode('text');
-var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
 var $author$project$Main$viewDot = F2(
 	function (length_, turns) {
 		return A6($author$project$Main$viewRay, $author$project$Main$watchFaceCenter, 8, $author$project$Main$watchFaceRadius, $author$project$Main$watchFaceRadius - length_, turns, $author$project$Main$frameColor);
@@ -6081,8 +6062,59 @@ var $elm$core$List$append = F2(
 var $elm$core$List$concat = function (lists) {
 	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
+var $elm$svg$Svg$Attributes$dominantBaseline = _VirtualDom_attribute('dominant-baseline');
+var $elm$svg$Svg$Attributes$fontSize = _VirtualDom_attribute('font-size');
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$svg$Svg$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$svg$Svg$Attributes$textAnchor = _VirtualDom_attribute('text-anchor');
+var $elm$svg$Svg$text_ = $elm$svg$Svg$trustedNode('text');
+var $author$project$Main$viewCircle = F3(
+	function (center, radius, fill_) {
+		return A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx(
+					$elm$core$String$fromFloat(center.a)),
+					$elm$svg$Svg$Attributes$cy(
+					$elm$core$String$fromFloat(center.b)),
+					$elm$svg$Svg$Attributes$r(
+					$elm$core$String$fromFloat(radius)),
+					$elm$svg$Svg$Attributes$fill(fill_)
+				]),
+			_List_Nil);
+	});
 var $author$project$Main$viewNumber = function (hour) {
-	return _List_Nil;
+	var fontSize_ = (!A2($elm$core$Basics$modBy, 3, hour)) ? '30' : '20';
+	var angle = $author$project$Main$turnsToAngle(
+		$author$project$Main$hourTurns_(hour));
+	var pos = A3($author$project$Main$radial, $author$project$Main$watchFaceCenter, $author$project$Main$watchFaceRadius * 0.8, angle);
+	return _List_fromArray(
+		[
+			A3($author$project$Main$viewCircle, pos, 1, 'yellow'),
+			A2(
+			$elm$svg$Svg$text_,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x(
+					$elm$core$String$fromFloat(pos.a)),
+					$elm$svg$Svg$Attributes$y(
+					$elm$core$String$fromFloat(pos.b)),
+					$elm$svg$Svg$Attributes$fill('black'),
+					$elm$svg$Svg$Attributes$textAnchor('middle'),
+					$elm$svg$Svg$Attributes$dominantBaseline('central'),
+					$elm$svg$Svg$Attributes$fontSize(fontSize_)
+				]),
+			_List_fromArray(
+				[
+					$elm$svg$Svg$text(
+					$elm$core$String$fromInt(hour))
+				]))
+		]);
 };
 var $author$project$Main$viewNumbers = $elm$core$List$concat(
 	A2(
@@ -6104,22 +6136,7 @@ var $author$project$Main$viewWatchFace = _Utils_ap(
 					$elm$svg$Svg$Attributes$stroke($author$project$Main$frameColor),
 					$elm$svg$Svg$Attributes$strokeWidth('4')
 				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$text_,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x('130'),
-					$elm$svg$Svg$Attributes$y('130'),
-					$elm$svg$Svg$Attributes$fill('black'),
-					$elm$svg$Svg$Attributes$textAnchor('middle'),
-					$elm$svg$Svg$Attributes$dominantBaseline('central'),
-					$elm$svg$Svg$Attributes$transform('rotate(-45 130,130)')
-				]),
-			_List_fromArray(
-				[
-					$elm$svg$Svg$text('Welcome to Shapes Club')
-				]))
+			_List_Nil)
 		]),
 	_Utils_ap(
 		$author$project$Main$view24Dots,
