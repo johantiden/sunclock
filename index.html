@@ -6051,6 +6051,43 @@ var $author$project$Main$view24Dots = A2(
 			$elm$core$List$map,
 			$elm$core$Basics$toFloat,
 			A2($elm$core$List$range, 0, 23))));
+var $elm$svg$Svg$Attributes$dominantBaseline = _VirtualDom_attribute('dominant-baseline');
+var $elm$svg$Svg$Attributes$fontSize = _VirtualDom_attribute('font-size');
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$svg$Svg$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$svg$Svg$Attributes$textAnchor = _VirtualDom_attribute('text-anchor');
+var $elm$svg$Svg$text_ = $elm$svg$Svg$trustedNode('text');
+var $author$project$Main$viewBranding = function () {
+	var pos = A3(
+		$author$project$Main$radial,
+		$author$project$Main$watchFaceCenter,
+		$author$project$Main$watchFaceRadius / 3,
+		$author$project$Main$turnsToAngle(0));
+	return _List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$text_,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x(
+					$elm$core$String$fromFloat(pos.a)),
+					$elm$svg$Svg$Attributes$y(
+					$elm$core$String$fromFloat(pos.b)),
+					$elm$svg$Svg$Attributes$fill('black'),
+					$elm$svg$Svg$Attributes$textAnchor('middle'),
+					$elm$svg$Svg$Attributes$dominantBaseline('central'),
+					$elm$svg$Svg$Attributes$fontSize('10')
+				]),
+			_List_fromArray(
+				[
+					$elm$svg$Svg$text('sol.tidn.se')
+				]))
+		]);
+}();
 var $elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -6062,32 +6099,6 @@ var $elm$core$List$append = F2(
 var $elm$core$List$concat = function (lists) {
 	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
-var $elm$svg$Svg$Attributes$dominantBaseline = _VirtualDom_attribute('dominant-baseline');
-var $elm$svg$Svg$Attributes$fontSize = _VirtualDom_attribute('font-size');
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$svg$Svg$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$svg$Svg$Attributes$textAnchor = _VirtualDom_attribute('text-anchor');
-var $elm$svg$Svg$text_ = $elm$svg$Svg$trustedNode('text');
-var $author$project$Main$viewCircle = F3(
-	function (center, radius, fill_) {
-		return A2(
-			$elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$cx(
-					$elm$core$String$fromFloat(center.a)),
-					$elm$svg$Svg$Attributes$cy(
-					$elm$core$String$fromFloat(center.b)),
-					$elm$svg$Svg$Attributes$r(
-					$elm$core$String$fromFloat(radius)),
-					$elm$svg$Svg$Attributes$fill(fill_)
-				]),
-			_List_Nil);
-	});
 var $author$project$Main$viewNumber = function (hour) {
 	var fontSize_ = (!A2($elm$core$Basics$modBy, 3, hour)) ? '30' : '20';
 	var angle = $author$project$Main$turnsToAngle(
@@ -6095,7 +6106,6 @@ var $author$project$Main$viewNumber = function (hour) {
 	var pos = A3($author$project$Main$radial, $author$project$Main$watchFaceCenter, $author$project$Main$watchFaceRadius * 0.8, angle);
 	return _List_fromArray(
 		[
-			A3($author$project$Main$viewCircle, pos, 1, 'yellow'),
 			A2(
 			$elm$svg$Svg$text_,
 			_List_fromArray(
@@ -6140,7 +6150,9 @@ var $author$project$Main$viewWatchFace = _Utils_ap(
 		]),
 	_Utils_ap(
 		$author$project$Main$view24Dots,
-		_Utils_ap($author$project$Main$view12Dots, $author$project$Main$viewNumbers)));
+		_Utils_ap(
+			$author$project$Main$view12Dots,
+			_Utils_ap($author$project$Main$viewNumbers, $author$project$Main$viewBranding))));
 var $author$project$Main$view = function (model) {
 	return A2(
 		$elm$svg$Svg$svg,
