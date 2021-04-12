@@ -5671,6 +5671,8 @@ var $author$project$Main$update = F2(
 				$elm$core$Platform$Cmd$none);
 		}
 	});
+var $elm$html$Html$a = _VirtualDom_node('a');
+var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var $author$project$Main$hourTurns_ = function (hour) {
 	return 0.5 + (hour / 24);
@@ -5751,6 +5753,21 @@ var $author$project$Main$hourTurns = function (model) {
 	var hour = A2($elm$time$Time$toHour, model.zone, model.time) + ((A2($elm$time$Time$toMinute, model.zone, model.time) + (A2($elm$time$Time$toSecond, model.zone, model.time) / 60)) / 60);
 	return $author$project$Main$hourTurns_(hour);
 };
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$Main$sunDiameter = 60;
 var $author$project$Main$sunPadding = 20;
@@ -5759,8 +5776,18 @@ var $author$project$Main$watchFaceRadius = 350;
 var $author$project$Main$watchFaceDiameter = $author$project$Main$watchFaceRadius * 2;
 var $author$project$Main$sceneSize = $author$project$Main$watchFaceDiameter + ($author$project$Main$sunTotalSize * 2);
 var $author$project$Main$sceneSizeStr = $elm$core$String$fromFloat($author$project$Main$sceneSize);
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
 var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
@@ -6057,7 +6084,6 @@ var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
 };
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$svg$Svg$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$svg$Svg$Attributes$textAnchor = _VirtualDom_attribute('text-anchor');
 var $elm$svg$Svg$text_ = $elm$svg$Svg$trustedNode('text');
@@ -6155,37 +6181,67 @@ var $author$project$Main$viewWatchFace = _Utils_ap(
 			_Utils_ap($author$project$Main$viewNumbers, $author$project$Main$viewBranding))));
 var $author$project$Main$view = function (model) {
 	return A2(
-		$elm$svg$Svg$svg,
+		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$svg$Svg$Attributes$viewBox(
-				A2(
-					$elm$core$String$join,
-					' ',
-					_List_fromArray(
-						['0', '0', $author$project$Main$sceneSizeStr, $author$project$Main$sceneSizeStr]))),
-				$elm$svg$Svg$Attributes$width($author$project$Main$sceneSizeStr),
-				$elm$svg$Svg$Attributes$height($author$project$Main$sceneSizeStr)
+				A2($elm$html$Html$Attributes$style, 'background-color', 'white')
 			]),
-		_Utils_ap(
-			$author$project$Main$viewBackground,
-			_Utils_ap(
-				A3(
-					$author$project$Main$viewSun,
-					$author$project$Main$hourTurns(model),
-					'yellow',
-					'none'),
+		_List_fromArray(
+			[
+				A2(
+				$elm$svg$Svg$svg,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$viewBox(
+						A2(
+							$elm$core$String$join,
+							' ',
+							_List_fromArray(
+								['0', '0', $author$project$Main$sceneSizeStr, $author$project$Main$sceneSizeStr]))),
+						A2($elm$html$Html$Attributes$style, 'width', '100%'),
+						$elm$svg$Svg$Attributes$width($author$project$Main$sceneSizeStr),
+						$elm$svg$Svg$Attributes$height($author$project$Main$sceneSizeStr)
+					]),
 				_Utils_ap(
-					$author$project$Main$viewEarth_(model),
+					$author$project$Main$viewBackground,
 					_Utils_ap(
 						A3(
 							$author$project$Main$viewSun,
 							$author$project$Main$hourTurns(model),
-							'#ffff0011',
-							'white'),
+							'yellow',
+							'none'),
 						_Utils_ap(
-							$author$project$Main$viewWatchFace,
-							$author$project$Main$viewHands(model)))))));
+							$author$project$Main$viewEarth_(model),
+							_Utils_ap(
+								A3(
+									$author$project$Main$viewSun,
+									$author$project$Main$hourTurns(model),
+									'#ffff0011',
+									'white'),
+								_Utils_ap(
+									$author$project$Main$viewWatchFace,
+									$author$project$Main$viewHands(model))))))),
+				A2(
+				$elm$html$Html$a,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$href('https://github.com/johantiden/sunclock'),
+						A2($elm$html$Html$Attributes$style, 'float', 'right')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$img,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$src('https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'),
+								A2($elm$html$Html$Attributes$style, 'height', '1em'),
+								A2($elm$html$Html$Attributes$style, 'vertical-align', 'bottom')
+							]),
+						_List_Nil),
+						$elm$html$Html$text('johantiden/sunclock')
+					]))
+			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
